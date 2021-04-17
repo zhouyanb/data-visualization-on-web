@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>大屏</title>
+        <script src="./js/vue.js"></script>
+        <script src="./js/axios.min.js"></script>
+        <script src="./js/echarts.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="./css/style.css">
+    </head>
+    <body>
+        <div id='app'>
+            <div id='box-1' style="width:700px; height:325px"></div>
+            <div id='box-2' style="width:700px; height:325px"></div>
+            <div id='box-3' style="width:700px; height:325px;"></div>
+            <div id='box-4' style="width:700px; height:325px;"></div>
+        </div>
+        <script>
+            var app = new Vue({
+                el:'#app',
+                data:{
+                   workchart: {
+                    chart:{},
+                    work_num_list:[],
+                    work_name:['后端工程师','前端工程师','Java工程师','算法工程师','数据分析师','测试工程师'] 
+                   },
+                   paychart: {
+                    chart:{},
+                    work_pay_list:[],
+                    work_name:['后端工程师','前端工程师','Java工程师','算法工程师','数据分析师','测试工程师'] 
+                   },
+                   companychart: {
+                       chart:{},
+                       company_data:[],
+                       company_name:['华为','腾讯','阿里巴巴','百度']
+                   },
+                   areachart: {
+                       chart:{},
+                       area_list:[],
+                       area_name:['北京','上海','深圳','杭州']
+
+                   }
+                },
+                methods:{
+                    setchart:function(chart,id,option){
+                        chart = echarts.init(document.getElementById(id));
+                        chart.setOption(option);
+                    },
+                    formatdata:function(j){
+                        var list = []
+                        for(var i=0;i<4;i++){
+                            list.push(this.companychart.company_data[i][j])
+                        }
+                        return list
+                    },
+                    initecharts:function(){
+                        var work_pay_option = {
+                            xAxis: {
+                                type: 'category',
+                                data: this.paychart.work_name
+                            },
+                            yAxis: {
+                                type: 'value'
+                            },
+                            tooltip:{
+                                trigger:'axis'
+                            },
+                            series: [{
+                                data: this.paychart.work_pay_list,
+                                type: 'bar'
+                            }]
+                        };
+                        var work_num_option = {
+                                    tooltip: {
+                                        trigger: 'item'
+                                    },
+                                    legend: {
+                                        orient: 'vertical',
+                                        left: 'left',
+                                    },
+                                    series: [
+                                        {
+                                            name: '岗位数量',
+                                            type: 'pie',
+                                            radius: ['40%', '70%'],
+                                            avoidLabelOverlap: false,
+                                            label: {
+                                                show: false,
+                                                position: 'center'
+                                            },
+                                            emphasis: {
+                                                label: {
+                                                    show: false,
+                                                }
+                                            },
+                                            labelLine: {
+                                                show: false
+                                            },
+                                            data: [
+                                                {value: this.workchart.work_num_list[0], name: this.workchart.work_name[0]},
+                                                {value: this.workchart.work_num_list[1], name: this.workchart.work_name[1]},
+                                                {value: this.workchart.work_num_list[2], name: this.workchart.work_name[2]},
+                                                {value: this.workchart.work_num_list[3], name: this.workchart.work_name[3]},
+                                                {value: this.workchart.work_num_list[4], name: this.workchart.work_name[4]},
+                                                {value: this.workchart.work_num_list[5], name: this.workchart.work_name[5]}
+                                            ]
+                                        }
+                                    ]
+                        };
+                    var company_option = {
+                                tooltip: {
+                                    trigger: 'axis',
+                                    axisPointer: {            
+                                        type: 'shadow'        
+                                    }
+                                },
+                                legend: {
+                                    data: ['后端工程师','前端工程师','Java工程师','算法工程师','数据分析师','测试工程师']
+                                },
+                                grid: {
+                                    left: '3%',
+                                    right: '4%',
+                                    bottom: '3%',
+                                    containLabel: true
+                                },
+                                xAxis: {
+                                    type: 'value'
+                                },
+                                yAxis: {
+                                    type: 'category',
+                                    data: this.companychart.company_name
+                                },
+                                series: [
+                                    {
+                                        name: '后端工程师',
+                                        type: 'bar',
+                                        stack: 'total',
+                                        label: {
+                                            show: true
+                                        },
+                                        emphasis: {
+                                            focus: 'series'
+                                        },
+                                        data: this.formatdata(0)
+                                    },
+                                    {
+                                        name: '前端工程师',
+                                        type: 'bar',
+                                        stack: 'total',
+                                        label: {
+                                            show: true
+                                        },
+                                        emphasis: {
+                                            focus: 'series'
+                                        },
+                                        data: this.formatdata(1)
+                                    },
+                                    {
+                                        name: 'Java工程师',
+                                        type: 'bar',
+                                        stack: 'total',
+                                        label: {
+                                            show: true
+                                        },
+                                        emphasis: {
+                                            focus: 'series'
+                                        },
+                                        data: this.formatdata(2)
+                                    },
+                                    {
+                                        name: '算法工程师',
+                                        type: 'bar',
+                                        stack: 'total',
+                                        label: {
+                                            show: true
+                                        },
+                                        emphasis: {
+                                            focus: 'series'
+                                        },
+                                        data: this.formatdata(3)
+                                    },
+                                    {
+                                        name: '数据分析师',
+                                        type: 'bar',
+                                        stack: 'total',
+                                        label: {
+                                            show: true
+                                        },
+                                        emphasis: {
+                                            focus: 'series'
+                                        },
+                                        data: this.formatdata(4)
+                                    },
+                                    {
+                                        name: '测试工程师',
+                                        type: 'bar',
+                                        stack: 'total',
+                                        label: {
+                                            show: true
+                                        },
+                                        emphasis: {
+                                            focus: 'series'
+                                        },
+                                        data: this.formatdata(5)
+                                    }
+                                    
+                                ]
+                        };
+                        var area_option = {
+                                dataset: [{
+                                    dimensions: ['city','num'],
+                                    source: [
+                                        [this.areachart.area_name[0],this.areachart.area_list[0]],
+                                        [this.areachart.area_name[1],this.areachart.area_list[1]],
+                                        [this.areachart.area_name[2],this.areachart.area_list[2]],
+                                        [this.areachart.area_name[3],this.areachart.area_list[3]]
+                                    ]
+                                }, {
+                                    transform: {
+                                        type: 'sort',
+                                        config: { dimension: 'num', order: 'desc' }
+                                    }
+                                }],
+                                xAxis: {
+                                    type: 'category',
+                                    // axisLabel: { interval: 0, rotate: 30 },
+                                },
+                                yAxis: {},
+                                tooltip:{
+                                    trigger:'axis'
+                                },
+                                series: {
+                                    type: 'bar',
+                                    encode: { x: 'city', y: 'num' },
+                                    datasetIndex: 1
+                                }
+                        };
+                        this.setchart(this.areachart.chart,'box-4',area_option);
+                        this.setchart(this.companychart.chart,'box-3',company_option);    
+                        this.setchart(this.paychart.chart,'box-2',work_pay_option);
+                        this.setchart(this.workchart.chart,'box-1',work_num_option);
+                    },
+                    getdata:function(){
+                        var that = this;
+                        axios.post('http://127.0.0.1:5000/getdata')
+                        .then(function(response){
+                            console.log(response);
+                            for(var i=0;i<6;i++){
+                                that.workchart.work_num_list.push(response.data.work_num[i]);
+                                that.paychart.work_pay_list.push(response.data.work_pay[i]);
+                                if(i<4){
+                                    that.companychart.company_data.push(response.data.company_data[i]);
+                                }
+                                if(i<4){
+                                    that.areachart.area_list.push(response.data.area_data[i]);
+                                }
+                            }
+                            
+                            
+                        },function(err){
+                            console.log(err);
+                        })
+                    }
+                },
+                mounted:function(){
+                    this.getdata();
+                    console.log(this.workdata);
+                    setTimeout(() => {
+                        this.initecharts();
+                    },1000);
+                }
+            })
+        </script>
+    </body>
+</html>

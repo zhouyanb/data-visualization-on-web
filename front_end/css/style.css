@@ -1,0 +1,21 @@
+/* body {
+    /* background-image: url(bg.jpg); */
+    /* background-color: rgb(9, 26, 82);
+} */ 
+#box-1 {
+    float: left;
+}
+
+#box-2 {
+    /* clear: both; */
+    float: right;
+}
+
+#box-3 {
+    clear: both;
+    float: left;
+}
+
+#box-4 {
+    float: right;
+}
