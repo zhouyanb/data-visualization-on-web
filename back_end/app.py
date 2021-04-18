@@ -27,7 +27,7 @@ def crawler(url):
     work_num_pay = {}
     work_company = {}
     work_area = {}
-    for i in range(1, 201):
+    for i in range(1, 21):
         print('page : %d' % i)
         urlpg = url + str(i)
         rep = request.Request(url=urlpg, headers=header)
@@ -58,12 +58,6 @@ def getWorkData(datadict, companydict, areadict):
     alldata = []
     companylist = []
     arealist = []
-    back_end = []
-    front_end = []
-    java = []
-    algorithm = []
-    dataanalysis = []
-    softwaretest = []
 
     class workdata:
         def __init__(self):
@@ -84,7 +78,10 @@ def getWorkData(datadict, companydict, areadict):
                         pass
 
         def getpay(self):
-            self.pay = self.pay / self.pay_num * 30
+            if self.pay_num == 0:
+                self.pay = 0
+            else:
+                self.pay = self.pay / self.pay_num * 30
             self.pay = int(self.pay)
 
     class companydata:
@@ -101,9 +98,20 @@ def getWorkData(datadict, companydict, areadict):
     class areadata:
         def __init__(self):
             self.num = 0
+            self.work_num_pay = []
+            self.worklist = []
+            self.back_end = []
+            self.front_end = []
+            self.java = []
+            self.algorithm = []
+            self.dataanalysis = []
+            self.softwaretest = []
 
         def count(self):
             self.num += 1
+
+        def addwork(self,work):
+            self.worklist.append(work)
 
     huawei = companydata()
     tencent = companydata()
@@ -156,26 +164,53 @@ def getWorkData(datadict, companydict, areadict):
             try:
                 if areadict[work] == '北京':
                     beijing.count()
+                    beijing.addwork(work)
                 elif areadict[work] == '上海':
                     shanghai.count()
+                    shanghai.addwork(work)
                 elif areadict[work] == '深圳':
                     shenzhen.count()
+                    shenzhen.addwork(work)
                 elif areadict[work] == '杭州':
                     hangzhou.count()
+                    hangzhou.addwork(work)
             except:
                 pass
 
         for work in worklist:
             if work != None:
                 getdata(work.group())
+    def find_data(datalist):
+        back_end = []
+        front_end = []
+        java = []
+        algorithm = []
+        dataanalysis = []
+        softwaretest = []
+        for workitem in datalist:
+            back_end.append(re.search(r'\S*后端\S*', workitem))
+            front_end.append(re.search(r'\S*前端\S*', workitem))
+            java.append(re.search(r'\S*java\S*', workitem, re.IGNORECASE))
+            algorithm.append(re.search(r'\S*算法\S*', workitem))
+            dataanalysis.append(re.search(r'\S*数据分析\S*', workitem))
+            softwaretest.append(re.search(r'\S*测试\S*', workitem))
+        return back_end,front_end,java,algorithm,dataanalysis,softwaretest
 
-    for workitem, workpay in datadict.items():
-        back_end.append(re.search(r'\S*后端\S*', workitem))
-        front_end.append(re.search(r'\S*前端\S*', workitem))
-        java.append(re.search(r'\S*java\S*', workitem, re.IGNORECASE))
-        algorithm.append(re.search(r'\S*算法\S*', workitem))
-        dataanalysis.append(re.search(r'\S*数据分析\S*', workitem))
-        softwaretest.append(re.search(r'\S*测试\S*', workitem))
+    def find_area_work(area):
+        area.back_end,area.front_end,area.java,area.algorithm,area.dataanalysis,area.softwaretest = find_data(area.worklist)
+
+    def create_area_work_num(area):
+        area.work_num_pay.append(getnum(area.back_end))
+        area.work_num_pay.append(getnum(area.front_end))
+        area.work_num_pay.append(getnum(area.java))
+        area.work_num_pay.append(getnum(area.algorithm))
+        area.work_num_pay.append(getnum(area.dataanalysis))
+        area.work_num_pay.append(getnum(softwaretest))
+
+    worklist = []
+    for i in datadict.keys():
+        worklist.append(i)
+    back_end, front_end, java, algorithm, dataanalysis, softwaretest = find_data(worklist)
     # print(java)
     alldata.append(getnum(back_end))
     alldata.append(getnum(front_end))
@@ -203,19 +238,35 @@ def getWorkData(datadict, companydict, areadict):
     selectarea(dataanalysis)
     selectarea(softwaretest)
 
-    arealist.append(beijing.num)
-    arealist.append(shanghai.num)
-    arealist.append(shenzhen.num)
-    arealist.append(hangzhou.num)
+    find_area_work(beijing)
+    find_area_work(shanghai)
+    find_area_work(shenzhen)
+    find_area_work(hangzhou)
+
+    create_area_work_num(beijing)
+    create_area_work_num(shanghai)
+    create_area_work_num(shenzhen)
+    create_area_work_num(hangzhou)
+
+    arealist.append(beijing)
+    arealist.append(shanghai)
+    arealist.append(shenzhen)
+    arealist.append(hangzhou)
 
     return alldata, companylist, arealist
 
 
+area_list = []
+area_work_pay = []
 work_pay_dict, work_company_dict, work_area_dict = crawler(url)
 # print(datadict)
-alldata, company_list, area_list = getWorkData(work_pay_dict, work_company_dict, work_area_dict)
+alldata, company_list, areadata = getWorkData(work_pay_dict, work_company_dict, work_area_dict)
+for i in areadata:
+    area_list.append(i.num)
+    area_work_pay.append(i.work_num_pay)
+    print(i.work_num_pay)
 
-
+# print(area_work)
 @app.route('/getdata', methods=['POST'])
 def getdata():
     work_num_data = []
@@ -223,5 +274,5 @@ def getdata():
     for i in alldata:
         work_num_data.append(i[0])
         work_pay_data.append(i[1])
-    return {'work_num': work_num_data, 'work_pay': work_pay_data, 'company_data': company_list, 'area_data': area_list}
+    return {'work_num': work_num_data, 'work_pay': work_pay_data, 'company_data': company_list, 'area_data': area_list,'area_detail': area_work_pay}
 

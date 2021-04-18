@@ -6,40 +6,72 @@
         <script src="./js/vue.js"></script>
         <script src="./js/axios.min.js"></script>
         <script src="./js/echarts.min.js"></script>
+        <script src="./js/vue-router.js"></script>
         <link rel="stylesheet" type="text/css" href="./css/style.css">
+        <link rel="stylesheet" href="./css/index.css">
+        <script src="./js/element-ui.js"></script>
     </head>
     <body>
         <div id='app'>
-            <div id='box-1' style="width:700px; height:325px"></div>
-            <div id='box-2' style="width:700px; height:325px"></div>
-            <div id='box-3' style="width:700px; height:325px;"></div>
-            <div id='box-4' style="width:700px; height:325px;"></div>
+            <div>
+                <router-link to='/beijing'><el-button type='primary' @click.native='initbeijing'>北京</el-button></router-link>
+            </div>
+            <router-view></router-view>
+            <div v-if='show'>
+                <div id='box-1' style="width:700px; height:325px"></div>
+                <div id='box-2' style="width:700px; height:325px"></div>
+                <div id='box-3' style="width:700px; height:325px;"></div>
+                <div id='box-4' style="width:700px; height:325px;"></div>
+            </div>
         </div>
         <script>
+            var work_list = ['后端工程师','前端工程师','Java工程师','算法工程师','数据分析师','测试工程师'];
+            var company_list = ['华为','腾讯','阿里巴巴','百度'];
+            var area_list = ['北京','上海','深圳','杭州'];
+            function create_chart(name){
+                this.chart = {};
+                this.list = [];
+                this.name = name; 
+            }
+            var beijing = {
+                template:`
+                <div>
+                    <div id='bj-box-1' style="width:700px; height:325px"></div>
+                    <div id='bj-box-2' style="width:700px; height:325px"></div> 
+                </div>`
+            };
+            var router = new VueRouter({
+                routes:[
+                    {path: '/beijing',component: beijing}
+                ]
+            })
             var app = new Vue({
                 el:'#app',
                 data:{
-                   workchart: {
-                    chart:{},
-                    work_num_list:[],
-                    work_name:['后端工程师','前端工程师','Java工程师','算法工程师','数据分析师','测试工程师'] 
+                   show:true,
+                   areadetail:{
+                    detail_list:[],
+                    beijing:{
+                        workchart: new create_chart(work_list),
+                        paychart: new create_chart(work_list)
+                    },
+                    shanghai:{
+                        workchart: new create_chart(work_list),
+                        paychart: new create_chart(work_list)
+                    },
+                    shenzhen:{
+                        workchart: new create_chart(work_list),
+                        paychart: new create_chart(work_list)
+                    },
+                    hangzhou:{
+                        workchart: new create_chart(work_list),
+                        paychart: new create_chart(work_list)
+                    }
                    },
-                   paychart: {
-                    chart:{},
-                    work_pay_list:[],
-                    work_name:['后端工程师','前端工程师','Java工程师','算法工程师','数据分析师','测试工程师'] 
-                   },
-                   companychart: {
-                       chart:{},
-                       company_data:[],
-                       company_name:['华为','腾讯','阿里巴巴','百度']
-                   },
-                   areachart: {
-                       chart:{},
-                       area_list:[],
-                       area_name:['北京','上海','深圳','杭州']
-
-                   }
+                   workchart: new create_chart(work_list),
+                   paychart: new create_chart(work_list),
+                   companychart: new create_chart(company_list),
+                   areachart: new create_chart(area_list)
                 },
                 methods:{
                     setchart:function(chart,id,option){
@@ -49,28 +81,20 @@
                     formatdata:function(j){
                         var list = []
                         for(var i=0;i<4;i++){
-                            list.push(this.companychart.company_data[i][j])
+                            list.push(this.companychart.list[i][j])
                         }
                         return list
                     },
-                    initecharts:function(){
-                        var work_pay_option = {
-                            xAxis: {
-                                type: 'category',
-                                data: this.paychart.work_name
-                            },
-                            yAxis: {
-                                type: 'value'
-                            },
-                            tooltip:{
-                                trigger:'axis'
-                            },
-                            series: [{
-                                data: this.paychart.work_pay_list,
-                                type: 'bar'
-                            }]
-                        };
-                        var work_num_option = {
+                    insertdata:function(area,list){
+                        // console.log(list);
+                        // console.log(list[0]);
+                        for(var i=0;i<6;i++){
+                            area.workchart.list.push(list[i][0]);
+                            area.paychart.list.push(list[i][1]);
+                        }
+                    },
+                    create_workchart:function(obj){
+                        var option =  {
                                     tooltip: {
                                         trigger: 'item'
                                     },
@@ -97,17 +121,39 @@
                                                 show: false
                                             },
                                             data: [
-                                                {value: this.workchart.work_num_list[0], name: this.workchart.work_name[0]},
-                                                {value: this.workchart.work_num_list[1], name: this.workchart.work_name[1]},
-                                                {value: this.workchart.work_num_list[2], name: this.workchart.work_name[2]},
-                                                {value: this.workchart.work_num_list[3], name: this.workchart.work_name[3]},
-                                                {value: this.workchart.work_num_list[4], name: this.workchart.work_name[4]},
-                                                {value: this.workchart.work_num_list[5], name: this.workchart.work_name[5]}
+                                                {value: obj.list[0], name: obj.name[0]},
+                                                {value: obj.list[1], name: obj.name[1]},
+                                                {value: obj.list[2], name: obj.name[2]},
+                                                {value: obj.list[3], name: obj.name[3]},
+                                                {value: obj.list[4], name: obj.name[4]},
+                                                {value: obj.list[5], name: obj.name[5]}
                                             ]
                                         }
                                     ]
                         };
-                    var company_option = {
+                        return option;
+                    },
+                    create_paychart:function(obj){
+                        var option = {
+                            xAxis: {
+                                type: 'category',
+                                data: obj.name
+                            },
+                            yAxis: {
+                                type: 'value'
+                            },
+                            tooltip:{
+                                trigger:'axis'
+                            },
+                            series: [{
+                                data: obj.list,
+                                type: 'bar'
+                            }]
+                        };
+                        return option;
+                    },
+                    create_companychart:function(obj){
+                        var option = {
                                 tooltip: {
                                     trigger: 'axis',
                                     axisPointer: {            
@@ -115,7 +161,7 @@
                                     }
                                 },
                                 legend: {
-                                    data: ['后端工程师','前端工程师','Java工程师','算法工程师','数据分析师','测试工程师']
+                                    data: work_list
                                 },
                                 grid: {
                                     left: '3%',
@@ -128,7 +174,7 @@
                                 },
                                 yAxis: {
                                     type: 'category',
-                                    data: this.companychart.company_name
+                                    data: obj.name
                                 },
                                 series: [
                                     {
@@ -206,14 +252,17 @@
                                     
                                 ]
                         };
-                        var area_option = {
+                        return option;
+                    },
+                    create_areachart:function(obj){
+                        var option = {
                                 dataset: [{
                                     dimensions: ['city','num'],
                                     source: [
-                                        [this.areachart.area_name[0],this.areachart.area_list[0]],
-                                        [this.areachart.area_name[1],this.areachart.area_list[1]],
-                                        [this.areachart.area_name[2],this.areachart.area_list[2]],
-                                        [this.areachart.area_name[3],this.areachart.area_list[3]]
+                                        [obj.name[0],obj.list[0]],
+                                        [obj.name[1],obj.list[1]],
+                                        [obj.name[2],obj.list[2]],
+                                        [obj.name[3],obj.list[3]]
                                     ]
                                 }, {
                                     transform: {
@@ -235,6 +284,24 @@
                                     datasetIndex: 1
                                 }
                         };
+                        return option;
+                    },
+                    initbeijing:function(){
+                        this.show = false;
+                        var workoption = this.create_workchart(this.areadetail.beijing.workchart);
+                        var payoption = this.create_paychart(this.areadetail.beijing.paychart);
+                        setTimeout(() => {
+                            // console.log(this.areadetail.beijing.paychart.name);
+                            // console.log(this.areadetail.beijing.paychart.list);
+                            this.setchart(this.areadetail.beijing.workchart.chart,'bj-box-1',workoption);
+                            this.setchart(this.areadetail.beijing.paychart.chart,'bj-box-2',payoption);
+                        },1000)
+                    },
+                    initecharts:function(){
+                        var work_pay_option = this.create_paychart(this.paychart);
+                        var work_num_option = this.create_workchart(this.workchart);
+                        var company_option = this.create_companychart(this.companychart);
+                        var area_option = this.create_areachart(this.areachart);
                         this.setchart(this.areachart.chart,'box-4',area_option);
                         this.setchart(this.companychart.chart,'box-3',company_option);    
                         this.setchart(this.paychart.chart,'box-2',work_pay_option);
@@ -246,16 +313,23 @@
                         .then(function(response){
                             console.log(response);
                             for(var i=0;i<6;i++){
-                                that.workchart.work_num_list.push(response.data.work_num[i]);
-                                that.paychart.work_pay_list.push(response.data.work_pay[i]);
+                                that.workchart.list.push(response.data.work_num[i]);
+                                that.paychart.list.push(response.data.work_pay[i]);
                                 if(i<4){
-                                    that.companychart.company_data.push(response.data.company_data[i]);
+                                    that.companychart.list.push(response.data.company_data[i]);
                                 }
                                 if(i<4){
-                                    that.areachart.area_list.push(response.data.area_data[i]);
+                                    that.areachart.list.push(response.data.area_data[i]);
                                 }
                             }
-                            
+                            for(var j=0;j<4;j++){
+                                that.areadetail.detail_list.push(response.data.area_detail[j]);
+                            }
+                            // console.log(response.data.area_detail[0]);
+                            that.insertdata(that.areadetail.beijing,response.data.area_detail[0]);
+                            that.insertdata(that.areadetail.shanghai,response.data.area_detail[1]);
+                            that.insertdata(that.areadetail.shenzhen,response.data.area_detail[2]);
+                            that.insertdata(that.areadetail.hangzhou,response.data.area_detail[3]);
                             
                         },function(err){
                             console.log(err);
@@ -264,11 +338,14 @@
                 },
                 mounted:function(){
                     this.getdata();
-                    console.log(this.workdata);
+                    // this.initdetail();
+                    // console.log(this.areadetail.detail_list);
+                    // console.log(this.workdata);
                     setTimeout(() => {
                         this.initecharts();
                     },1000);
-                }
+                },
+                router
             })
         </script>
     </body>
