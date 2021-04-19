@@ -2,4 +2,4 @@
 
 基于vue,echarts,flask
 
-![image](https://github.com/zhouyanb/data-visualization-on-web/blob/main/message/QQ%E6%88%AA%E5%9B%BE20210419172201.png)
+![image](https://github.com/zhouyanb/data-visualization-on-web/blob/main/message/message1.png)
