@@ -14,7 +14,10 @@
     <body>
         <div id='app'>
             <div>
-                <router-link to='/beijing'><el-button type='primary' @click.native='initbeijing'>北京</el-button></router-link>
+                <router-link to='/beijing'><el-button type='primary' @click.native='initareadetail(areadetail.beijing,["bj-box-1","bj-box-2"])'>北京</el-button></router-link>
+                <router-link to='/shanghai'><el-button type='primary' @click.native='initareadetail(areadetail.shanghai,["sh-box-1","sh-box-2"])'>上海</el-button></router-link>
+                <router-link to='/shenzhen'><el-button type='primary' @click.native='initareadetail(areadetail.shenzhen,["sz-box-1","sz-box-2"])'>深圳</el-button></router-link>
+                <router-link to='/hangzhou'><el-button type='primary' @click.native='initareadetail(areadetail.hangzhou,["hz-box-1","hz-box-2"])'>杭州</el-button></router-link>
             </div>
             <router-view></router-view>
             <div v-if='show'>
@@ -40,9 +43,33 @@
                     <div id='bj-box-2' style="width:700px; height:325px"></div> 
                 </div>`
             };
+            var shanghai = {
+                template:`
+                <div>
+                    <div id='sh-box-1' style="width:700px; height:325px"></div>
+                    <div id='sh-box-2' style="width:700px; height:325px"></div> 
+                </div>`
+            };
+            var shenzhen = {
+                template:`
+                <div>
+                    <div id='sz-box-1' style="width:700px; height:325px"></div>
+                    <div id='sz-box-2' style="width:700px; height:325px"></div> 
+                </div>`
+            };
+            var hangzhou = {
+                template:`
+                <div>
+                    <div id='hz-box-1' style="width:700px; height:325px"></div>
+                    <div id='hz-box-2' style="width:700px; height:325px"></div> 
+                </div>`
+            };
             var router = new VueRouter({
                 routes:[
-                    {path: '/beijing',component: beijing}
+                    {path: '/beijing',component: beijing},
+                    {path: '/shanghai',component: shanghai},
+                    {path: '/shenzhen',component: shenzhen},
+                    {path: '/hangzhou',component: hangzhou}
                 ]
             })
             var app = new Vue({
@@ -286,16 +313,14 @@
                         };
                         return option;
                     },
-                    initbeijing:function(){
+                    initareadetail:function(area,boxlist){
                         this.show = false;
-                        var workoption = this.create_workchart(this.areadetail.beijing.workchart);
-                        var payoption = this.create_paychart(this.areadetail.beijing.paychart);
+                        var workoption = this.create_workchart(area.workchart);
+                        var payoption = this.create_paychart(area.paychart);
                         setTimeout(() => {
-                            // console.log(this.areadetail.beijing.paychart.name);
-                            // console.log(this.areadetail.beijing.paychart.list);
-                            this.setchart(this.areadetail.beijing.workchart.chart,'bj-box-1',workoption);
-                            this.setchart(this.areadetail.beijing.paychart.chart,'bj-box-2',payoption);
-                        },1000)
+                            this.setchart(area.workchart.chart,boxlist[0],workoption);
+                            this.setchart(area.paychart.chart,boxlist[1],payoption);
+                        })
                     },
                     initecharts:function(){
                         var work_pay_option = this.create_paychart(this.paychart);
