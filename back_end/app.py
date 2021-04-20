@@ -5,29 +5,26 @@ import ssl
 from urllib import request
 import re
 
+# 此项目基于Flask
+
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 # 建立一个不需要SSL验证的上下文
+
 ssl._create_default_https_context = ssl._create_unverified_context
 
 url = 'https://www.nowcoder.com/intern/center?recruitType=1&page='
 
-header = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"}
+header = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"}
 
-
-# requests.DEFAULT_RETRIES = 5
-# s = requests.session()
-# s.keep_alive = False
-# res = requests.get(url,headers=header,verify=False)
-# time.sleep(5)
+# 爬取所需的数据
 
 def crawler(url):
     work_num_pay = {}
     work_company = {}
     work_area = {}
-    for i in range(1, 21):
+    for i in range(1, 201):
         print('page : %d' % i)
         urlpg = url + str(i)
         rep = request.Request(url=urlpg, headers=header)
@@ -49,21 +46,27 @@ def crawler(url):
                 work_area[work] = adder
             except:
                 pass
-    # print(work_company)
-    # print(work_area)
+
+# 将爬取的数据整合为三个字典，分别为工作-工资，工作-公司，工作-地区的对应
+
     return work_num_pay, work_company, work_area
 
+
+# 将得到的数据进行分析
 
 def getWorkData(datadict, companydict, areadict):
     alldata = []
     companylist = []
     arealist = []
 
+# 工作数据对象，拥有工作数量，工作的平均工资属性
     class workdata:
         def __init__(self):
             self.num = 0
             self.pay = 0
             self.pay_num = 0
+
+# 分析工作数据得到相应工作的数量和总工资
 
         def analysis_work(self, list):
             for i in list:
@@ -76,6 +79,7 @@ def getWorkData(datadict, companydict, areadict):
                             self.pay_num += 1
                     except:
                         pass
+# 计算出平均工资
 
         def getpay(self):
             if self.pay_num == 0:
@@ -83,6 +87,8 @@ def getWorkData(datadict, companydict, areadict):
             else:
                 self.pay = self.pay / self.pay_num * 30
             self.pay = int(self.pay)
+
+# 公司数据对象，拥有对应工作数量的列表
 
     class companydata:
         def __init__(self):
@@ -94,6 +100,8 @@ def getWorkData(datadict, companydict, areadict):
 
         def clear(self):
             self.count = 0
+
+# 地区数据对象,拥有地区所有工作总数，和地区对应工作的数量，地区对应工作的平均工资
 
     class areadata:
         def __init__(self):
@@ -113,21 +121,29 @@ def getWorkData(datadict, companydict, areadict):
         def addwork(self,work):
             self.worklist.append(work)
 
+# 构造公司对象
+
     huawei = companydata()
     tencent = companydata()
     alibaba = companydata()
     baidu = companydata()
+
+# 构造地区对象
 
     beijing = areadata()
     shanghai = areadata()
     shenzhen = areadata()
     hangzhou = areadata()
 
+# 计算工作数量和平均工资函数
+
     def getnum(list):
         obj = workdata()
         obj.analysis_work(list)
         obj.getpay()
         return obj.num, obj.pay
+
+# 计算各公司各工作数量
 
     def selectecompany(worklist):
         def dataclear(obj):
@@ -154,10 +170,13 @@ def getWorkData(datadict, companydict, areadict):
                 dataselect('腾讯', work.group())
                 dataselect('阿里巴巴', work.group())
                 dataselect('百度', work.group())
+
         dataclear(huawei)
         dataclear(tencent)
         dataclear(alibaba)
         dataclear(baidu)
+
+# 计算各地区工作总数量
 
     def selectarea(worklist):
         def getdata(work):
@@ -180,6 +199,9 @@ def getWorkData(datadict, companydict, areadict):
         for work in worklist:
             if work != None:
                 getdata(work.group())
+
+# 分析数据找到对应的工作
+
     def find_data(datalist):
         back_end = []
         front_end = []
@@ -196,8 +218,12 @@ def getWorkData(datadict, companydict, areadict):
             softwaretest.append(re.search(r'\S*测试\S*', workitem))
         return back_end,front_end,java,algorithm,dataanalysis,softwaretest
 
+# 找到各地区对应的工作
+
     def find_area_work(area):
         area.back_end,area.front_end,area.java,area.algorithm,area.dataanalysis,area.softwaretest = find_data(area.worklist)
+
+# 计算各地区各工作的数量
 
     def create_area_work_num(area):
         area.work_num_pay.append(getnum(area.back_end))
@@ -206,6 +232,8 @@ def getWorkData(datadict, companydict, areadict):
         area.work_num_pay.append(getnum(area.algorithm))
         area.work_num_pay.append(getnum(area.dataanalysis))
         area.work_num_pay.append(getnum(softwaretest))
+
+# 调用函数
 
     worklist = []
     for i in datadict.keys():
@@ -253,20 +281,21 @@ def getWorkData(datadict, companydict, areadict):
     arealist.append(shenzhen)
     arealist.append(hangzhou)
 
+# 返回分析后的数据分别是工作数量，工作平均工资列表的列表，各公司各工作数量列表的列表，各地区对象的列表
     return alldata, companylist, arealist
 
 
 area_list = []
 area_work_pay = []
 work_pay_dict, work_company_dict, work_area_dict = crawler(url)
-# print(datadict)
 alldata, company_list, areadata = getWorkData(work_pay_dict, work_company_dict, work_area_dict)
 for i in areadata:
     area_list.append(i.num)
     area_work_pay.append(i.work_num_pay)
-    print(i.work_num_pay)
 
-# print(area_work)
+
+# 构造接口，定义方法为post，返回字典数据
+
 @app.route('/getdata', methods=['POST'])
 def getdata():
     work_num_data = []
@@ -274,5 +303,5 @@ def getdata():
     for i in alldata:
         work_num_data.append(i[0])
         work_pay_data.append(i[1])
-    return {'work_num': work_num_data, 'work_pay': work_pay_data, 'company_data': company_list, 'area_data': area_list,'area_detail': area_work_pay}
+    return {'work_num': work_num_data, 'work_pay': work_pay_data, 'company_data': company_list, 'area_data': area_list, 'area_detail': area_work_pay}
 

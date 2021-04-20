@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>大屏</title>
+        <!-- 此项目基于vue,axios,echarts,element-ui与vue-router -->
         <script src="./js/vue.js"></script>
         <script src="./js/axios.min.js"></script>
         <script src="./js/echarts.min.js"></script>
@@ -31,11 +32,13 @@
             var work_list = ['后端工程师','前端工程师','Java工程师','算法工程师','数据分析师','测试工程师'];
             var company_list = ['华为','腾讯','阿里巴巴','百度'];
             var area_list = ['北京','上海','深圳','杭州'];
+            // 定义图表构造函数
             function create_chart(name){
                 this.chart = {};
                 this.list = [];
                 this.name = name; 
             }
+            // 定义各地区对象，template为各地区的模板
             var beijing = {
                 template:`
                 <div>
@@ -64,6 +67,7 @@
                     <div id='hz-box-2' style="width:700px; height:325px"></div> 
                 </div>`
             };
+            // 设置路由规则
             var router = new VueRouter({
                 routes:[
                     {path: '/beijing',component: beijing},
@@ -72,12 +76,14 @@
                     {path: '/hangzhou',component: hangzhou}
                 ]
             })
+            // 创建Vue实例
             var app = new Vue({
                 el:'#app',
                 data:{
                    show:true,
                    areadetail:{
                     detail_list:[],
+                    // 定义vue中的各地区图表对象
                     beijing:{
                         workchart: new create_chart(work_list),
                         paychart: new create_chart(work_list)
@@ -95,16 +101,19 @@
                         paychart: new create_chart(work_list)
                     }
                    },
+                   // 定义图表对象
                    workchart: new create_chart(work_list),
                    paychart: new create_chart(work_list),
                    companychart: new create_chart(company_list),
                    areachart: new create_chart(area_list)
                 },
                 methods:{
+                    // 封装echarts的初始化图表功能
                     setchart:function(chart,id,option){
                         chart = echarts.init(document.getElementById(id));
                         chart.setOption(option);
                     },
+                    // 处理公司数据
                     formatdata:function(j){
                         var list = []
                         for(var i=0;i<4;i++){
@@ -112,14 +121,14 @@
                         }
                         return list
                     },
+                    // 处理各地区数据
                     insertdata:function(area,list){
-                        // console.log(list);
-                        // console.log(list[0]);
                         for(var i=0;i<6;i++){
                             area.workchart.list.push(list[i][0]);
                             area.paychart.list.push(list[i][1]);
                         }
                     },
+                    // 封装饼状图
                     create_workchart:function(obj){
                         var option =  {
                                     tooltip: {
@@ -160,6 +169,7 @@
                         };
                         return option;
                     },
+                    // 封装柱状图
                     create_paychart:function(obj){
                         var option = {
                             xAxis: {
@@ -179,6 +189,7 @@
                         };
                         return option;
                     },
+                    // 封装堆叠条形图
                     create_companychart:function(obj){
                         var option = {
                                 tooltip: {
@@ -281,6 +292,7 @@
                         };
                         return option;
                     },
+                    // 封装已排序的条形图
                     create_areachart:function(obj){
                         var option = {
                                 dataset: [{
@@ -299,7 +311,6 @@
                                 }],
                                 xAxis: {
                                     type: 'category',
-                                    // axisLabel: { interval: 0, rotate: 30 },
                                 },
                                 yAxis: {},
                                 tooltip:{
@@ -313,6 +324,7 @@
                         };
                         return option;
                     },
+                    // 初始化地区数据图表
                     initareadetail:function(area,boxlist){
                         this.show = false;
                         var workoption = this.create_workchart(area.workchart);
@@ -322,6 +334,7 @@
                             this.setchart(area.paychart.chart,boxlist[1],payoption);
                         })
                     },
+                    // 初始化主页图表
                     initecharts:function(){
                         var work_pay_option = this.create_paychart(this.paychart);
                         var work_num_option = this.create_workchart(this.workchart);
@@ -332,6 +345,7 @@
                         this.setchart(this.paychart.chart,'box-2',work_pay_option);
                         this.setchart(this.workchart.chart,'box-1',work_num_option);
                     },
+                    // 从服务端获取数据
                     getdata:function(){
                         var that = this;
                         axios.post('http://127.0.0.1:5000/getdata')
@@ -350,7 +364,6 @@
                             for(var j=0;j<4;j++){
                                 that.areadetail.detail_list.push(response.data.area_detail[j]);
                             }
-                            // console.log(response.data.area_detail[0]);
                             that.insertdata(that.areadetail.beijing,response.data.area_detail[0]);
                             that.insertdata(that.areadetail.shanghai,response.data.area_detail[1]);
                             that.insertdata(that.areadetail.shenzhen,response.data.area_detail[2]);
@@ -361,11 +374,9 @@
                         })
                     }
                 },
+                // vue钩子函数，在实例挂载后执行，从服务端获取数据并异步初始化主页图表
                 mounted:function(){
                     this.getdata();
-                    // this.initdetail();
-                    // console.log(this.areadetail.detail_list);
-                    // console.log(this.workdata);
                     setTimeout(() => {
                         this.initecharts();
                     },1000);
