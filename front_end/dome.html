@@ -15,18 +15,23 @@
     <body>
         <div id='app'>
             <div>
-                <router-link to='/beijing'><el-button type='primary' @click.native='initareadetail(areadetail.beijing,["bj-box-1","bj-box-2"])'>北京</el-button></router-link>
-                <router-link to='/shanghai'><el-button type='primary' @click.native='initareadetail(areadetail.shanghai,["sh-box-1","sh-box-2"])'>上海</el-button></router-link>
-                <router-link to='/shenzhen'><el-button type='primary' @click.native='initareadetail(areadetail.shenzhen,["sz-box-1","sz-box-2"])'>深圳</el-button></router-link>
-                <router-link to='/hangzhou'><el-button type='primary' @click.native='initareadetail(areadetail.hangzhou,["hz-box-1","hz-box-2"])'>杭州</el-button></router-link>
+                <el-tabs v-model="activeName" type="card">
+                    <el-tab-pane name="first"><router-link to='/' slot="label" @click.native='refresh'>主页</router-link></el-tab-pane>
+                    <el-tab-pane name="second"><router-link to='/beijing' slot="label" @click.native='initareadetail(areadetail.beijing,["bj-box-1","bj-box-2"])'>北京</router-link></el-tab-pane>
+                    <el-tab-pane name="third"><router-link to='/shanghai' slot="label" @click.native='initareadetail(areadetail.shanghai,["sh-box-1","sh-box-2"])'>上海</router-link></el-tab-pane>
+                    <el-tab-pane name="fourth"><router-link to='/shenzhen' slot="label" @click.native='initareadetail(areadetail.shenzhen,["sz-box-1","sz-box-2"])'>深圳</router-link></el-tab-pane>
+                    <el-tab-pane name="fifth"><router-link to='/hangzhou' slot="label" @click.native='initareadetail(areadetail.hangzhou,["hz-box-1","hz-box-2"])'>杭州</router-link></el-tab-pane>
+                </el-tabs>   
             </div>
             <router-view></router-view>
-            <div v-if='show'>
+            
+            <div v-if='show' id='main-charts'>
                 <div id='box-1' style="width:700px; height:325px"></div>
                 <div id='box-2' style="width:700px; height:325px"></div>
                 <div id='box-3' style="width:700px; height:325px;"></div>
                 <div id='box-4' style="width:700px; height:325px;"></div>
             </div>
+            
         </div>
         <script>
             var work_list = ['后端工程师','前端工程师','Java工程师','算法工程师','数据分析师','测试工程师'];
@@ -81,6 +86,8 @@
                 el:'#app',
                 data:{
                    show:true,
+                   activeName:'first',
+                   loading:true,
                    areadetail:{
                     detail_list:[],
                     // 定义vue中的各地区图表对象
@@ -334,7 +341,7 @@
                             this.setchart(area.paychart.chart,boxlist[1],payoption);
                         })
                     },
-                    // 初始化主页图表
+                    // 初始化主页图表 
                     initecharts:function(){
                         var work_pay_option = this.create_paychart(this.paychart);
                         var work_num_option = this.create_workchart(this.workchart);
@@ -372,13 +379,24 @@
                         },function(err){
                             console.log(err);
                         })
-                    }
+                    },
+                    // 刷新页面
+                    refresh:function(){
+                        window.location.reload();
+                    },
                 },
                 // vue钩子函数，在实例挂载后执行，从服务端获取数据并异步初始化主页图表
                 mounted:function(){
                     this.getdata();
+                    var loading = this.$loading({
+                            lock:true,
+                            text:'Loading...',
+                            spinner: 'el-icon-loading',
+                            background: 'rgba(0, 0, 0, 0.6)',
+                        });
                     setTimeout(() => {
                         this.initecharts();
+                        loading.close();
                     },1000);
                 },
                 router
